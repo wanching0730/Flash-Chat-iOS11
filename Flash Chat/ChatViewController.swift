@@ -7,9 +7,10 @@
 //
 
 import UIKit
+import Firebase
 
 
-class ChatViewController: UIViewController {
+class ChatViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate {
     
     // Declare instance variables here
 
@@ -26,11 +27,12 @@ class ChatViewController: UIViewController {
         super.viewDidLoad()
         
         //TODO: Set yourself as the delegate and datasource here:
-        
+        messageTableView.delegate = self
+        messageTableView.dataSource = self
         
         
         //TODO: Set yourself as the delegate of the text field here:
-
+        messageTextfield.delegate = self
         
         
         //TODO: Set the tapGesture here:
@@ -38,6 +40,9 @@ class ChatViewController: UIViewController {
         
 
         //TODO: Register your MessageCell.xib file here:
+        messageTableView.register(UINib(nibName: "MessageCell", bundle: nil), forCellReuseIdentifier: "customMessageCell")
+        
+        configureTableView()
 
         
     }
@@ -49,11 +54,24 @@ class ChatViewController: UIViewController {
     
     
     //TODO: Declare cellForRowAtIndexPath here:
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
+        let cell = tableView.dequeueReusableCell(withIdentifier: "customMessageCell", for: indexPath)
+            as! CustomMessageCell
+        
+        let messageArray = ["one", "two", "three"]
+        
+        cell.messageBody.text = messageArray[indexPath.row]
+        
+        return cell
+    }
     
     
     
     //TODO: Declare numberOfRowsInSection here:
-    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 3
+    }
     
     
     //TODO: Declare tableViewTapped here:
@@ -61,6 +79,10 @@ class ChatViewController: UIViewController {
     
     
     //TODO: Declare configureTableView here:
+    func configureTableView () {
+        messageTableView.rowHeight = UITableViewAutomaticDimension
+        messageTableView.estimatedRowHeight = 120.0
+    }
     
     
     
@@ -72,12 +94,21 @@ class ChatViewController: UIViewController {
 
     
     //TODO: Declare textFieldDidBeginEditing here:
-    
-    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        UIView.animate(withDuration: 0.5) {
+            self.heightConstraint.constant = 308
+            self.view.layoutIfNeeded()
+        }
+    }
     
     
     //TODO: Declare textFieldDidEndEditing here:
-    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        UIView.animate(withDuration: 0.5) {
+            self.heightConstraint.constant = 50
+            self.view.layoutIfNeeded()
+        }
+    }
 
     
     ///////////////////////////////////////////
@@ -108,6 +139,19 @@ class ChatViewController: UIViewController {
         
         //TODO: Log out the user and send them back to WelcomeViewController
         
+        do {
+            try Auth.auth().signOut()
+            
+            navigationController?.popToRootViewController(animated: true)
+        } catch {
+            print("Error in signing out")
+        }
+        
+        guard(navigationController?.popToRootViewController(animated: true)) != nil
+            else {
+                print("No view controllers to pop off")
+                return
+        }
         
     }
     
